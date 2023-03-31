@@ -21,16 +21,14 @@ while running:
 
     # RENDER YOUR GAME HERE
     # Creating aliens
-    locations = []
+    aliens = []
     for n in range(0, 300, 40):
         for m in range(0, 200, 40):
-            locations.append((n, m))
-    aliens = []
-    for n in locations:
-        if locations.index(n) not in to_remove:
-            alien1 = pygame.image.load(os.path.join('Images', 'alien-1295484_1280.png')).convert_alpha()
-            alien = screen.blit(alien1, n)
-            aliens.append(alien)
+            if (n, m) not in to_remove:
+                alien1 = pygame.image.load(os.path.join('Images', 'alien-1295484_1280.png')).convert_alpha()
+                alien = screen.blit(alien1, (n, m))
+                aliens.append(alien)
+
     # creating Shooter
     mouse_x_loc = pygame.mouse.get_pos()[0]
     shooter = pygame.image.load(os.path.join('Images', 'tank-3567419_1920.png')).convert_alpha()
@@ -53,8 +51,7 @@ while running:
             shoot = False
             if len(collided_with) > 0:
                 for n in collided_with:
-                    print(n)
-                    to_remove.append(n)
+                    to_remove.append((aliens[n].x, aliens[n].y))
 
     # flip() the display to put your work on screen
     pygame.display.flip()
