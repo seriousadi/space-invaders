@@ -3,12 +3,16 @@ import os
 
 pygame.init()
 screen = pygame.display.set_mode((350, 550))
+screen_x, screen_y = screen.get_size()
+
 clock = pygame.time.Clock()
 shoot = False
-y = 400
+bullet_y = 400  # bullet starting location at y-axis
 running = True
-to_remove = []
-
+aliens_to_remove = []
+alien_x = 0
+alien_y = 0
+move_left = 1
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -21,13 +25,21 @@ while running:
 
     # RENDER YOUR GAME HERE
     # Creating aliens
+    aliens_cooridinates = []
     aliens = []
+    total_aliens  = 0
     for n in range(0, 300, 40):
         for m in range(0, 200, 40):
-            if (n, m) not in to_remove:
-                alien1 = pygame.image.load(os.path.join('Images', 'alien-1295484_1280.png')).convert_alpha()
-                alien = screen.blit(alien1, (n, m))
-                aliens.append(alien)
+            aliens_cooridinates.append((n + alien_x, m + alien_y))
+            total_aliens +=1
+
+    for n in aliens_to_remove:
+        aliens_cooridinates.pop(n)
+
+    for n in aliens_cooridinates:
+        alien1 = pygame.image.load(os.path.join('Images', 'alien-1295484_1280.png')).convert_alpha()
+        alien = screen.blit(alien1, n)
+        aliens.append(alien)
 
     # creating Shooter
     mouse_x_loc = pygame.mouse.get_pos()[0]
@@ -37,25 +49,42 @@ while running:
     # mouse Clicked checking
     mouse_left_click = pygame.mouse.get_pressed()[0]
 
-    if mouse_left_click and y == 400:
+    if mouse_left_click and bullet_y == 400:
         shoot = True
         shooted_from = mouse_x_loc
 
     if shoot:
         bullet_up = pygame.image.load(os.path.join('Images', 'bullet-up.png')).convert_alpha()
-        bullet_up = screen.blit(bullet_up, (shooted_from + 23, y))
-        y -= 10
+        bullet_up = screen.blit(bullet_up, (shooted_from + 23, bullet_y))
+        bullet_y -= 10
         collided_with = bullet_up.collidelistall(aliens)
-        if y < 1 or len(collided_with) > 0:
-            y = 400
+        if bullet_y < 1 or len(collided_with) > 0:
+            bullet_y = 400
             shoot = False
             if len(collided_with) > 0:
                 for n in collided_with:
-                    to_remove.append((aliens[n].x, aliens[n].y))
+                    aliens_to_remove.append(n)
 
+    alien_x += move_left
+    for n in aliens:
+        if n.x > screen_x - 30:
+            move_left = -1
+
+            alien_y += 3
+            break
+        if n.x < 3:
+            move_left = 1
+            alien_y += 3
+            break
+        if n.y > 370:
+            running = False
+            print("You've lost")
+
+    if len(aliens_to_remove) ==total_aliens:
+        running =False
+        print("You've won")
     # flip() the display to put your work on screen
     pygame.display.flip()
-
     clock.tick(20)  # limits FPS to 60
 
 pygame.quit()
